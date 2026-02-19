@@ -1,0 +1,78 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "NTES Route + Live Status";
+}
+
+<div class="text-center mb-4">
+    <h1 class="display-6">Train Route Finder (NTES)</h1>
+    <p>Enter a train number to view route details, live status, and export to Excel.</p>
+</div>
+
+<form method="post" class="card p-3 mb-4 shadow-sm">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label asp-for="TrainNumber" class="form-label">Train Number</label>
+            <input asp-for="TrainNumber" class="form-control" placeholder="e.g. 12301" />
+        </div>
+        <div class="col-md-8 d-flex gap-2">
+            <button type="submit" asp-page-handler="Search" class="btn btn-primary">Search Route</button>
+            <button type="submit" asp-page-handler="Export" class="btn btn-success">Export Excel</button>
+        </div>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (Model.RouteData is not null)
+{
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <h5>@Model.RouteData.TrainName (@Model.RouteData.TrainNumber)</h5>
+            @if (Model.RouteData.LiveStatus is not null)
+            {
+                <div class="row">
+                    <div class="col-md-3"><strong>Status:</strong> @Model.RouteData.LiveStatus.RunningStatus</div>
+                    <div class="col-md-3"><strong>Current:</strong> @Model.RouteData.LiveStatus.CurrentStation</div>
+                    <div class="col-md-3"><strong>Delay:</strong> @Model.RouteData.LiveStatus.DelayInfo</div>
+                    <div class="col-md-3"><strong>Updated:</strong> @Model.RouteData.LiveStatus.LastUpdatedAt</div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Code</th>
+                    <th>Station</th>
+                    <th>Arrival</th>
+                    <th>Departure</th>
+                    <th>Halt</th>
+                    <th>Distance</th>
+                    <th>Platform</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var stop in Model.RouteData.Stops)
+                {
+                    <tr>
+                        <td>@stop.Sequence</td>
+                        <td>@stop.StationCode</td>
+                        <td>@stop.StationName</td>
+                        <td>@stop.ArrivalTime</td>
+                        <td>@stop.DepartureTime</td>
+                        <td>@stop.HaltMinutes</td>
+                        <td>@stop.DistanceKm</td>
+                        <td>@stop.Platform</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
